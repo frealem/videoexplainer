@@ -1,0 +1,6 @@
+{
+  "name": "VideoExplainer",
+  "description": "Organize your video and audio clips and chat with your personal knowledge base using Gemini AI.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VideoExplainer Social Scraper & Chat</title>
+  <style>
+    :root {
+      --bg-color: #0d0d0d;
+      --panel-color: #161616;
+      --border-color: #2b2b2b;
+      --text-color: #f3f4f6;
+      --text-muted: #9ca3af;
+      --accent-blue: #3b82f6;
+      --accent-purple: #a855f7;
+      --success-green: #10b981;
+      --error-red: #ef4444;
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      width: 420px;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      padding: 16px;
+      font-size: 14px;
+      overflow-x: hidden;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 10px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand img {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+    }
+
+    .logo-text {
+      font-weight: 900;
+      font-style: italic;
+      letter-spacing: -0.5px;
+      background: linear-gradient(90deg, #60a5fa, #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .server-status {
+      font-size: 11px;
+      font-family: monospace;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background-color: #111;
+      border: 1px solid var(--border-color);
+    }
+
+    .status-online { color: var(--success-green); }
+    .status-offline { color: var(--error-red); }
+
+    /* Main Card */
+    .card {
+      background-color: var(--panel-color);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Active Tab URL Panel */
+    .url-display {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background-color: #0a0a0a;
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid #222;
+      margin-bottom: 8px;
+    }
+
+    .platform-badge {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #fff;
+    }
+
+    .badge-youtube { background-color: #ff0000; }
+    .badge-tiktok { background-color: #000000; border: 1px solid #555; }
+    .badge-instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+    .badge-unsupported { background-color: #4b5563; }
+
+    .url-text {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-family: monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      flex-1: 1;
+    }
+
+    /* Tab switcher */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background-color: #0a0a0a;
+      padding: 3px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 6px 12px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background-color: var(--panel-color);
+      color: var(--text-color);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Forms */
+    .form-group {
+      margin-bottom: 10px;
+    }
+
+    label {
+      display: block;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .input-control, select {
+      width: 100%;
+      background-color: #0a0a0a;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px 10px;
+      color: var(--text-color);
+      font-size: 13px;
+      transition: border-color 0.2s;
+    }
+
+    .input-control:focus, select:focus {
+      outline: none;
+      border-color: var(--accent-blue);
+    }
+
+    /* Buttons */
+    .btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 13px;
+      transition: transform 0.1s, opacity 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn:hover {
+      opacity: 0.95;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn:disabled {
+      background: #2b2b2b;
+      color: #666;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      background: #1e1e1e;
+      border: 1px solid var(--border-color);
+      color: var(--text-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: #242424;
+    }
+
+    /* Chat Section */
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 240px;
+      border: 1px solid var(--border-color);
+      background-color: #0a0a0a;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .chat-messages {
+      flex-1: 1;
+      padding: 10px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      height: 190px;
+    }
+
+    .msg {
+      max-width: 85%;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      line-height: 1.4;
+      word-wrap: break-word;
+    }
+
+    .msg.user {
+      align-self: flex-end;
+      background-color: var(--accent-blue);
+      color: white;
+      border-bottom-right-radius: 2px;
+    }
+
+    .msg.bot {
+      align-self: flex-start;
+      background-color: var(--panel-color);
+      border: 1px solid var(--border-color);
+      border-bottom-left-radius: 2px;
+    }
+
+    .chat-input-row {
+      display: flex;
+      border-t: 1px solid var(--border-color);
+      background-color: var(--panel-color);
+    }
+
+    .chat-input-row input {
+      flex: 1;
+      background: none;
+      border: none;
+      padding: 10px;
+      color: white;
+      font-size: 12.5px;
+    }
+
+    .chat-input-row input:focus {
+      outline: none;
+    }
+
+    .chat-send-btn {
+      background: none;
+      border: none;
+      color: var(--accent-blue);
+      padding: 0 14px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    /* Info notifications */
+    .info-box {
+      font-size: 11.5px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      background-color: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      color: #93c5fd;
+      line-height: 1.4;
+    }
+
+    .success-box {
+      font-size: 11.5px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      background-color: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      display: none;
+      margin-top: 8px;
+    }
+
+    /* Gear Settings Panel */
+    .settings-panel {
+      display: none;
+      padding-top: 10px;
+      border-t: 1px dashed var(--border-color);
+      margin-top: 10px;
+    }
+
+    .settings-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 12px;
+      margin-top: 8px;
+    }
+
+    .chevron {
+      transition: transform 0.2s;
+    }
+
+    .expand .chevron {
+      transform: rotate(90deg);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <img src="icon-128.png" alt="Logo">
+      <span class="logo-text">VideoExplainer Ext</span>
+    </div>
+    <div id="connectionStatus" class="server-status">
+      Checking Sync...
+    </div>
+  </header>
+
+  <!-- URL Detector / Action Panel -->
+  <div class="card">
+    <div class="section-title">
+      Active Browser Tab
+    </div>
+    <div class="url-display">
+      <span id="platformBadge" class="platform-badge badge-unsupported">None</span>
+      <span id="activeUrlText" class="url-text">Finding tab URL...</span>
+    </div>
+    <div id="tabTitle" style="font-size: 12px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-muted); padding: 0 2px;">
+      Detecting content...
+    </div>
+  </div>
+
+  <!-- Tab switcher for Actions -->
+  <div class="tabs">
+    <button id="tabSaveBtn" class="tab-btn active" onclick="switchTab('save')">Save Clip</button>
+    <button id="tabChatBtn" class="tab-btn" onclick="switchTab('chat')">Ask AI Video</button>
+  </div>
+
+  <!-- TAB PANEL 1: SAVE CLIP -->
+  <div id="tabSave" class="tab-content active">
+    <div class="form-group">
+      <label for="containerSelector">Select Knowledge Container</label>
+      <select id="containerSelector">
+        <option value="">-- Loading Containers... --</option>
+      </select>
+    </div>
+
+    <button id="btnSaveClip" class="btn" disabled>
+      Extract & Save to Database
+    </button>
+    
+    <div id="successSaveBox" class="success-box">
+      🎉 Video successfully crawled, summarized, and matched to container database!
+    </div>
+  </div>
+
+  <!-- TAB PANEL 2: CHAT WITH VIDEO -->
+  <div id="tabChat" class="tab-content">
+    <div class="chat-container">
+      <div id="chatMessages" class="chat-messages">
+        <div class="msg bot">
+          👋 I can analyze this video instantly. Ask any question about its key teachings, transcripts, or specific segments!
+        </div>
+      </div>
+      <div class="chat-input-row">
+        <input type="text" id="chatInput" placeholder="Ask details (e.g., What step was mentioned at 2:00?)" disabled />
+        <button id="chatSendButton" class="chat-send-btn" disabled>Ask</button>
+      </div>
+    </div>
+    <div class="info-box" id="chatInfoNotice">
+      ⚡ Questions are analyzed using Gemini powered by the video's direct transcript.
+    </div>
+  </div>
+
+  <!-- Settings Expandable Footer -->
+  <div class="settings-header" onclick="toggleSettings()" id="settingsToggle">
+    <span>⚙️ Extension Server Settings</span>
+    <span class="chevron">▶</span>
+  </div>
+
+  <div class="settings-panel" id="settingsPanel">
+    <div class="form-group" style="margin-top: 8px;">
+      <label for="serverUrlInput">Custom Render/Backend Server Host URL</label>
+      <input type="text" id="serverUrlInput" class="input-control" placeholder="https://ais-dev-...run.app" />
+    </div>
+    <button id="btnSaveServer" class="btn btn-secondary" style="font-size: 11px; padding: 6px;">
+      Save Server Configuration
+    </button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
